@@ -28,7 +28,7 @@ def draw_lines(img, lines, color = (0, 255, 0)):
     for line in lines:
         x1, y1, x2, y2 = line[0]
         cv2.line(img, (x1, y1), (x2, y2), color, 10)
-    return cv2.cvtColor(img, cv2.BGR2RGB)
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 def draw_slopes(img, lines):
     for line in lines:
