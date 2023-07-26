@@ -37,7 +37,7 @@ def draw_slopes(img, lines):
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         print(f'{slope = }')
         cv2.putText(img, f'{slope = }', (x1, y1), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
-    return cv2.cvtColor(img, cv2.BGR2RGB)
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 def getSlope(line: cv2.HoughLinesP) -> float:
     x1, y1, x2, y2 = line[0]
@@ -63,6 +63,22 @@ def get_slopes_intercepts(lines: cv2.HoughLinesP):
         slopes.append(getSlope(line))
         intercepts.append(getXInt(line))
     return (slopes, intercepts)
+
+# def merge_collinear_lines(lines: cv2.HoughLinesP):
+#     if len(lines) < 4: # TODO: temporary magic number
+#         return lines    
+#     else:
+#         (slopes, intercepts) = get_slopes_intercepts(lines)
+#         new_lines = []
+#         for i, line in enumerate(lines):
+#             if i == 0:
+#                 i = 1
+#             if i == len(lines):
+#                 i = len(lines - 1)
+#             rel_tol = 0.1
+#             if (math.isclose(slopes[i], slopes[i - 1], rel_tol=rel_tol) or math.isclose(slopes[i], slopes[i + 1], rel_tol=rel_tol)) and (math.isclose(intercepts[i], intercepts[i - 1], rel_tol=rel_tol) or math.isclose(intercepts[i], intercepts[i + 1], rel_tol=rel_tol)):
+#                 lines.pop(i)
+#         return merge_collinear_lines(lines)    
 
 def detect_lanes(lines: cv2.HoughLinesP):
     lanes = []
