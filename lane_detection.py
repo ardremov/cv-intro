@@ -11,7 +11,8 @@ def detect_lines(img,
                  minLineLength = 100, 
                  maxLineGap = 10):
     
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+    blur = cv2.GaussianBlur(img, (9, 9), 0)
+    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY) 
     edges = cv2.Canny(gray, threshold1, threshold2, apertureSize) 
     lines = cv2.HoughLinesP(
                     edges,
@@ -24,11 +25,13 @@ def detect_lines(img,
     
     return lines
 
-def draw_lines(img, lines, color = (0, 255, 0)):
+def draw_lines(img, lines, color = (0, 255,0)): # THANKS TOBY!
+    temp_img = img
     for line in lines:
         x1, y1, x2, y2 = line[0]
-        cv2.line(img, (x1, y1), (x2, y2), color, 10)
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.line(temp_img, (x1, y1), (x2, y2), color, 2)
+
+    return temp_img
 
 def draw_slopes(img, lines):
     for line in lines:
@@ -80,15 +83,77 @@ def get_slopes_intercepts(lines: cv2.HoughLinesP):
 #                 lines.pop(i)
 #         return merge_collinear_lines(lines)    
 
-def detect_lanes(lines: cv2.HoughLinesP):
+def detect_lanes(lines): # THANKS TOBY!
+
+    #MERGE LINES
     lanes = []
-    
-    (slopes, intercept_points) = get_slopes_intercepts(lines)
-    x_intercepts = [point[0] for point in intercept_points]
-    dict  = dict(zip(x_intercepts, lines))
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        deltaY = y2 - y1
+        if x2 == x1:
+            slope = None
+            xInt = x1
+        else:
+            slope = (y2 - y1)/(x2 - x1)
+            if y2 == y1:
+                xInt = None
+            else:
+                xInt = (slope * x1 - y1) / slope
+        if slope != None and xInt != None and deltaY != 0:
+            lanes.append([slope, xInt, x1, y1, x2, y2])
 
-    return lanes
+    cleanedLines = []
+    for line in lanes:
+        canAdd = True
+        for cleanedLine in cleanedLines:
+            if abs(cleanedLine[0] - line[0]) < 0.1:
+                canAdd = False
 
-def draw_lanes(img: cv2.imread, lanes):
-    
-    pass
+        if canAdd:
+            cleanedLines.append(line)
+    # DONE MERGING LINES
+    #------
+    # DELETE LINES NOT PART OF A LANE
+
+    sorted_lines = cleanedLines
+    sorted_lines.sort(key=get_array_x_int)
+    if len(sorted_lines) > 2:  
+        oneToZero = sorted_lines[1][1] - sorted_lines[0][1]
+        twoToOne = sorted_lines[2][1] - sorted_lines[1][1]
+
+        if(twoToOne < oneToZero):
+            sorted_lines.pop(0)
+        if len(sorted_lines) % 2 != 0:
+            sorted_lines.pop(len(sorted_lines) - 1)
+    # DONE DELETING LINES NOT IN LANE
+    #------
+    #PAIR LINES
+
+    pairs = []
+    if len(sorted_lines) >= 2:
+        #pair 
+        for i in range(0,len(sorted_lines)-1, 2):
+            pairs.append([sorted_lines[i],sorted_lines[i+1]])
+    #print(pairs)
+
+    if len(pairs) > 0:
+        if len(pairs) % 2 == 0: 
+            center_lane = pairs[int((len(pairs))/2) -1]
+        else:
+            center_lane = pairs[int((len(pairs) + 1)/2) - 1]
+        #print(center_lane)
+    else:
+        return []
+
+
+    return center_lane
+
+def draw_lanes(img, lanes): # THANKS TOBY!
+    temp_img = img
+    for line in lanes:
+        x1 = line[2]#USING CONVENTION FROM DETECT_LANES
+        y1 =line[3]
+        x2 = line[4]
+        y2 =line[5]
+        cv2.line(temp_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    return temp_img
