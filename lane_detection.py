@@ -4,6 +4,9 @@ import math
 import matplotlib.pyplot as plt
 from dt_apriltags import Detector
 
+def get_array_x_int(elem):
+    return elem[1]
+
 def detect_lines(img, 
                  threshold1 = 50, 
                  threshold2 = 150, 
@@ -83,7 +86,7 @@ def get_slopes_intercepts(lines: cv2.HoughLinesP):
 #                 lines.pop(i)
 #         return merge_collinear_lines(lines)    
 
-def detect_lanes(lines): # THANKS TOBY!
+def detect_lanes(lines): # THANKS TOBY
 
     #MERGE LINES
     lanes = []
@@ -98,7 +101,7 @@ def detect_lanes(lines): # THANKS TOBY!
             if y2 == y1:
                 xInt = None
             else:
-                xInt = (slope * x1 - y1) / slope
+                xInt = ((1080-y1)/slope) + x1
         if slope != None and xInt != None and deltaY != 0:
             lanes.append([slope, xInt, x1, y1, x2, y2])
 
