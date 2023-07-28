@@ -7,16 +7,20 @@ from dt_apriltags import Detector
 def get_array_x_int(elem):
     return elem[1]
 
-def detect_lines(img, 
+def proccess_img(img):
+    sliced = img[int(img.shape[0] / 2): img.shape[1]]
+    blur = cv2.GaussianBlur(sliced, (9, 9), 0)
+    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY) 
+    return gray
+
+def detect_lines(img, # input a PROCESSED image!
                  threshold1 = 50, 
                  threshold2 = 150, 
                  apertureSize = 3, 
                  minLineLength = 100, 
                  maxLineGap = 10):
     
-    blur = cv2.GaussianBlur(img, (9, 9), 0)
-    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY) 
-    edges = cv2.Canny(gray, threshold1, threshold2, apertureSize) 
+    edges = cv2.Canny(img, threshold1, threshold2, apertureSize) 
     lines = cv2.HoughLinesP(
                     edges,
                     1, 
@@ -71,7 +75,7 @@ def get_slopes_intercepts(lines: cv2.HoughLinesP):
     return (slopes, intercepts)
 
 # def merge_collinear_lines(lines: cv2.HoughLinesP):
-#     if len(lines) < 4: # TODO: temporary magic number
+#     if len(lines) < 4: # temporary magic number
 #         return lines    
 #     else:
 #         (slopes, intercepts) = get_slopes_intercepts(lines)
@@ -152,11 +156,12 @@ def detect_lanes(lines): # THANKS TOBY
     return center_lane
 
 def draw_lanes(img, lanes): # THANKS TOBY!
+    h = img.shape[0]
     temp_img = img
     for line in lanes:
         x1 = line[2]#USING CONVENTION FROM DETECT_LANES
-        y1 =line[3]
+        y1 =line[3] + int(h / 2) # offset prior image splice. janky, but works. 
         x2 = line[4]
-        y2 =line[5]
+        y2 =line[5] + int(h / 2)
         cv2.line(temp_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     return temp_img
