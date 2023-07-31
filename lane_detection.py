@@ -90,7 +90,7 @@ def get_slopes_intercepts(lines: cv2.HoughLinesP):
 #                 lines.pop(i)
 #         return merge_collinear_lines(lines)    
 
-def detect_lanes(lines): # THANKS TOBY
+def detect_lanes(lines, screen_height):
 
     #MERGE LINES
     lanes = []
@@ -105,7 +105,7 @@ def detect_lanes(lines): # THANKS TOBY
             if y2 == y1:
                 xInt = None
             else:
-                xInt = ((1080-y1)/slope) + x1
+                xInt = (screen_height - y1)/slope + x1
         if slope != None and xInt != None and deltaY != 0:
             lanes.append([slope, xInt, x1, y1, x2, y2])
 
@@ -158,10 +158,10 @@ def detect_lanes(lines): # THANKS TOBY
 def draw_lanes(img, lanes): # THANKS TOBY!
     h = img.shape[0]
     temp_img = img
-    for line in lanes:
-        x1 = line[2]#USING CONVENTION FROM DETECT_LANES
-        y1 =line[3] + int(h / 2) # offset prior image splice. janky, but works. 
-        x2 = line[4]
-        y2 =line[5] + int(h / 2)
+    for lane in lanes:
+        x1 = lane[2]#USING CONVENTION FROM DETECT_LANES
+        y1 =lane[3] + int(h / 2) # offset prior image splice. janky, but works. 
+        x2 = lane[4]
+        y2 =lane[5] + int(h / 2)
         cv2.line(temp_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     return temp_img
