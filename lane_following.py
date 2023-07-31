@@ -7,18 +7,24 @@ directions = {
     0 : "forward"
 }
 
+strafe = {
+    -1 : "right",
+    1: "left",
+    0 : "forward"
+}
+
 # THANKS TOBY!
 
 def get_lane_center(lane):
     if len(lane) == 2:
-        center = (lane[0][1] + lane[1][1])/2 
+        center = (lane[0][1] + lane[1][1])/2
         slope = (1/((1/(lane[0][0]) + 1/(lane[1][0]))/2))
         return (center, slope)
     return (0,0)
 
 def get_center_line(center, slope, screen_height):
     if slope == 0:
-        return [0,0,0, 0, 0, 0]
+        return [0, 0, 0, 0, 0, 0]
     topX = (-1 * screen_height + slope * center)/slope
     #print(slope)
     return [0,0,topX, 0, center, screen_height]
