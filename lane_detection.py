@@ -105,7 +105,7 @@ def detect_lanes(lines, screen_height):
             if y2 == y1:
                 xInt = None
             else:
-                xInt = (-y1 + (x1 * slope)) / slope
+                xInt = (y1 + (x1 * slope)) / slope
         if slope != None and xInt != None and deltaY != 0:
             lanes.append([slope, xInt, x1, y1, x2, y2])
 
