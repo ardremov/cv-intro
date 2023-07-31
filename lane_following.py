@@ -2,14 +2,8 @@ from numpy import sign
 import cv2
 
 directions = {
-    -1 : "right",
-    1: "left",
-    0 : "forward"
-}
-
-strafe = {
-    -1 : "right",
-    1: "left",
+    -1 : "left",
+    1: "right",
     0 : "forward"
 }
 
